@@ -86,3 +86,43 @@ export default withAuthenticator(App, {
 $ npm start
 ```
 `http://localhost_3000` へアクセスすると、
+
+
+### POST 機能の追加
+```
+$ amplify add api
+
+Please select from one of the below mentioned services: GraphQL
+Provide API name: BoyakiGql
+Choose the default authorization type for the API: Amazon Cognito User Pool
+Do you want to configure advanced settings for the GraphQL API: No, I am done.
+Do you have an annotated GraphQL schema? No
+Do you want a guided schema creation? No
+Provide a custom type name: Post
+```
+
+`./amplify/backend/api/BoyakiGql/schema.graphql` を編集することで API の挙動を生やすことが出来る。
+
+```
+type Post
+  @model (subscriptions: { level: public })
+  @auth(rules: [
+    {allow: owner, ownerField:"owner", provider: userPools, operations:[read, create]}
+    {allow: private, provider: userPools, operations:[read]}
+  ])
+{
+  type: String! # always set to 'post'. used in the SortByTimestamp GSI
+  id: ID
+  content: String!
+  owner: String
+  timestamp: AWSTimestamp!
+}
+```
+
+`$ amplify push` は反映に時間がかかるので、mock を使うことで開発効率を上げることができる。
+
+```
+amplify mock api
+```
+
+
